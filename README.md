@@ -1,23 +1,32 @@
 # Safeguard
-WTC-ETZVEYCV
+Safeguard is a Java cybersecurity learning project
+focused on file inspection and basic malware detection.
 
-A small Java tracker that stores entries and manages their status
-(`OPEN`, `IN_PROGRESS`, `RESOLVED`).
+## Current features
 
-## Project structure
-
-```
+- File existence and readability checks
+- File size inspection
+- Error handling
+- Automated unit tests with JUnit 5
 
 ## Requirements
-- Java 17+
-- Maven 3.8+
+
+- Java JDK 21
+- Maven
 
 ## Run the tests
+
 ```bash
-mvn test
+mvn clean test
 ```
 
-## Run the app
-```bash
-mvn compile exec:java -Dexec.mainClass=com.safeguard.App
-```
+## Current limitations
+
+This initial version does not detect malware.
+Hash-based signature detection and scanning will be
+implemented in later development stages.
+
+
+WTC-ETZVEYCV
+
+
