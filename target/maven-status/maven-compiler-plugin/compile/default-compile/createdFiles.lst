@@ -1,2 +1,3 @@
 com/safeguard/FileInspector$InspectionResult.class
 com/safeguard/FileInspector.class
+com/safeguard/FileHasher.class
