@@ -1,2 +1,4 @@
+com/safeguard/MalwareSignatureCheckerTest.class
 com/safeguard/FileHasherTest.class
 com/safeguard/FileInspectorTest.class
+com/safeguard/SignatureDatabaseTest.class

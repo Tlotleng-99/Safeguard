@@ -1,2 +1,5 @@
 /home/wethinkcode/Desktop/BROWNFIELDS/personal_projects/Safeguard/src/main/java/com/safeguard/FileHasher.java
 /home/wethinkcode/Desktop/BROWNFIELDS/personal_projects/Safeguard/src/main/java/com/safeguard/FileInspector.java
+/home/wethinkcode/Desktop/BROWNFIELDS/personal_projects/Safeguard/src/main/java/com/safeguard/MalwareSignatureChecker.java
+/home/wethinkcode/Desktop/BROWNFIELDS/personal_projects/Safeguard/src/main/java/com/safeguard/SafeguardApp.java
+/home/wethinkcode/Desktop/BROWNFIELDS/personal_projects/Safeguard/src/main/java/com/safeguard/SignatureDatabase.java
