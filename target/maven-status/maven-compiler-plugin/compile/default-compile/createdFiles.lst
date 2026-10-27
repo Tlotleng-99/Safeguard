@@ -1,7 +1,0 @@
-com/safeguard/SignatureDatabase.class
-com/safeguard/MalwareSignatureChecker.class
-com/safeguard/FileInspector$InspectionResult.class
-com/safeguard/FileInspector.class
-com/safeguard/SafeguardApp.class
-com/safeguard/FileHasher.class
-com/safeguard/MalwareSignatureChecker$ScanResult.class
