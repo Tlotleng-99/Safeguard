@@ -40,9 +40,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleUnsupportedMediaType(
             HttpMediaTypeNotSupportedException exception) {
 
-        return ResponseEntity.badRequest().body(Map.of(
-                "error", "Please select a file to scan."
-        ));
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .body(Map.of(
+                        "error", "Unsupported request content type."
+                ));
     }
 
     @ExceptionHandler(Exception.class)
