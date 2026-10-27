@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safeguard | File Security Scanner</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="/app.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" href="/">
+        <span class="brand-icon">S</span>
+        <span>SAFEGUARD</span>
+    </a>
+    <span class="status"><span class="dot"></span> LOCAL SCANNER</span>
+</header>
+
+<main class="container">
+    <section class="intro">
+        <p class="eyebrow">FILE SECURITY CENTER</p>
+        <h1>Scan files.<br><span>Stay protected.</span></h1>
+        <p class="subtitle">
+            Inspect files, calculate SHA-256 hashes and check for
+            known signatures using your local signature database.
+        </p>
+    </section>
+
+    <section class="panel">
+        <div class="panel-heading">
+            <div>
+                <h2>File scanner</h2>
+                <p>Choose a file to begin inspection.</p>
+            </div>
+            <span class="shield">◇</span>
+        </div>
+
+        <form id="scanForm">
+            <label class="upload-area" for="fileInput" id="dropArea">
+                <span class="upload-icon">↑</span>
+                <strong id="fileLabel">Choose a file to scan</strong>
+                <span id="fileHint">Click here or drag and drop a file</span>
+                <span class="limit">Maximum upload size: 10 MB</span>
+            </label>
+
+            <input id="fileInput" name="file" type="file" required>
+
+            <button id="scanButton" type="submit">Scan file →</button>
+        </form>
+
+        <p id="statusMessage" class="status-message" role="status"
+           aria-live="polite"></p>
+
+        <section id="results" class="results" hidden>
+            <div class="result-heading">
+                <h2>Scan results</h2>
+                <span id="resultBadge" class="result-badge"></span>
+            </div>
+
+            <div class="result-grid">
+                <div class="result-item">
+                    <span>File name</span>
+                    <strong id="resultName"></strong>
+                </div>
+                <div class="result-item">
+                    <span>File size</span>
+                    <strong id="resultSize"></strong>
+                </div>
+                <div class="result-item full">
+                    <span>SHA-256</span>
+                    <code id="resultHash"></code>
+                </div>
+                <div class="result-item full">
+                    <span>Signature result</span>
+                    <strong id="resultMessage"></strong>
+                </div>
+            </div>
+
+            <p class="disclaimer">
+                A signature match is a detection indicator. No match
+                does not prove that a file is safe.
+            </p>
+        </section>
+    </section>
+
+    <section class="feature-grid">
+        <article class="feature">
+            <span>01 / INSPECT</span>
+            <h3>File analysis</h3>
+            <p>Inspect uploaded files and their sizes.</p>
+        </article>
+        <article class="feature">
+            <span>02 / HASH</span>
+            <h3>SHA-256</h3>
+            <p>Generate a cryptographic file fingerprint.</p>
+        </article>
+        <article class="feature">
+            <span>03 / DETECT</span>
+            <h3>Signature matching</h3>
+            <p>Compare hashes against known entries.</p>
+        </article>
+    </section>
+
+    <footer>
+        Safeguard · Educational security prototype · Not a full antivirus
+    </footer>
+</main>
+</body>
+</html>
