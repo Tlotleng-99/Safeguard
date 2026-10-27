@@ -59,6 +59,22 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleMultipartError(
             MultipartException exception) {
 
+        Throwable cause = exception;
+
+        while (cause != null) {
+            if (cause instanceof MaxUploadSizeExceededException
+                    || (cause.getMessage() != null
+                    && cause.getMessage().toLowerCase()
+                    .contains("maximum upload size exceeded"))) {
+
+                return ResponseEntity.badRequest().body(Map.of(
+                        "error", "File exceeds the 10 MB upload limit."
+                ));
+            }
+
+            cause = cause.getCause();
+        }
+
         return ResponseEntity.badRequest().body(Map.of(
                 "error", "Please select a file to scan."
         ));
