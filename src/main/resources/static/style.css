@@ -320,3 +320,30 @@ footer {
         grid-column: auto;
     }
 }
+
+#resultWarning {
+    margin-top: 12px;
+    padding: 12px 16px;
+    border: 1px solid #d97706;
+    border-radius: 8px;
+    background: rgba(217, 119, 6, 0.12);
+    color: #fbbf24;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+#resultWarning[hidden] {
+    display: none;
+}
+
+.result-badge.unknown {
+    background: rgba(217, 119, 6, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(217, 119, 6, 0.5);
+}
+
+.result-badge.detected {
+    background: rgba(220, 38, 38, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(220, 38, 38, 0.5);
+}

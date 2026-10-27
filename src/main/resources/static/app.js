@@ -103,15 +103,28 @@ form.addEventListener("submit", async event => {
         document.getElementById("resultMessage").textContent =
             result.message;
 
-        const badge = document.getElementById("resultBadge");
 
-        if (result.signatureMatched) {
-            badge.textContent = "SIGNATURE MATCH";
-            badge.className = "result-badge detected";
-        } else {
-            badge.textContent = "NO MATCH FOUND";
-            badge.className = "result-badge clear";
-        }
+    const badge = document.getElementById("resultBadge");
+
+    if (result.signatureMatched === true) {
+        badge.textContent = "KNOWN SIGNATURE MATCH";
+        badge.className = "result-badge detected";
+    } else if (result.signatureMatched === false) {
+        badge.textContent = "NO KNOWN MATCH";
+        badge.className = "result-badge unknown";
+    } else {
+        badge.textContent = "SCAN STATUS UNKNOWN";
+        badge.className = "result-badge unknown";
+    }
+
+    const warning = document.getElementById("resultWarning");
+
+    if (warning) {
+        warning.textContent = result.signatureMatched === true
+            ? "Warning: A known signature matched. Treat this file as suspicious."
+            : "No known signature matched. This does not prove the file is safe.";
+        warning.hidden = false;
+    }
 
         results.hidden = false;
         statusMessage.textContent = "Scan completed.";
