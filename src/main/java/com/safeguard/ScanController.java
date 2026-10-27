@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +18,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class ScanController {
+    private static final Logger logger =
+            LoggerFactory.getLogger(ScanController.class);
 
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -56,10 +59,21 @@ public class ScanController {
             var result = signatureChecker.scan(temporaryFile);
 
             String originalFilename = file.getOriginalFilename();
-            String safeFilename = originalFilename == null
-                    || originalFilename.isBlank()
-                    ? "uploaded-file"
-                    : Path.of(originalFilename).getFileName().toString();
+            String safeFilename = "uploaded-file";
+
+            if (originalFilename != null && !originalFilename.isBlank()) {
+                try {
+                    String filename = originalFilename.replace('\\', '/');
+                    safeFilename = Path.of(filename).getFileName().toString();
+
+                    if (safeFilename.isBlank() || safeFilename.equals(".")
+                            || safeFilename.equals("..")) {
+                        safeFilename = "uploaded-file";
+                    }
+                } catch (RuntimeException exception) {
+                    safeFilename = "uploaded-file";
+                }
+            }
 
             return ResponseEntity.ok(Map.of(
                     "fileName", safeFilename,
@@ -79,8 +93,8 @@ public class ScanController {
             if (temporaryFile != null) {
                 try {
                     Files.deleteIfExists(temporaryFile);
-                } catch (IOException ignored) {
-                    // Temporary-file cleanup is best effort.
+                } catch (IOException exception) {
+                    logger.warn("Could not delete temporary upload file.");
                 }
             }
         }
