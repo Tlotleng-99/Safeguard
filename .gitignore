@@ -7,3 +7,5 @@ target/
 
 # Compiled Java files
 *.class
+
+/data/
