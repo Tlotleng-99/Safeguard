@@ -35,7 +35,8 @@ class ScanControllerTest {
                 .andExpect(jsonPath("$.sizeBytes").value(23))
                 .andExpect(jsonPath("$.sha256").exists())
                 .andExpect(jsonPath("$.signatureMatched").exists())
-                .andExpect(jsonPath("$.message").exists());
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.inspection").exists());
     }
 
     @Test
@@ -52,7 +53,6 @@ class ScanControllerTest {
                 .andExpect(jsonPath("$.error")
                         .value("Please select a non-empty file."));
     }
-
 
     @Test
     void oversizedFileReturnsBadRequest() throws Exception {
@@ -71,12 +71,11 @@ class ScanControllerTest {
                         .value("File exceeds the 10 MB upload limit."));
     }
 
-
     @Test
     void missingFileReturnsBadRequest() throws Exception {
         mockMvc.perform(multipart("/api/scan"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error")
+                        .value("Please select a file to scan."));
     }
-
-
 }

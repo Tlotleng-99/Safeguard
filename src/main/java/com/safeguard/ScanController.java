@@ -1,7 +1,6 @@
 
 package com.safeguard;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,7 +46,8 @@ public class ScanController {
 
         try {
             temporaryFile = Files.createTempFile(
-                    "safeguard-upload-", ".tmp");
+                    "safeguard-upload-", ".tmp"
+            );
 
             file.transferTo(temporaryFile);
 
@@ -55,11 +55,14 @@ public class ScanController {
             var inspection = inspector.inspect(temporaryFile);
             var result = signatureChecker.scan(temporaryFile);
 
+            String originalFilename = file.getOriginalFilename();
+            String safeFilename = originalFilename == null
+                    || originalFilename.isBlank()
+                    ? "uploaded-file"
+                    : Path.of(originalFilename).getFileName().toString();
+
             return ResponseEntity.ok(Map.of(
-                    "fileName", file.getOriginalFilename() == null
-                            ? "uploaded-file"
-                            : Path.of(file.getOriginalFilename())
-                            .getFileName().toString(),
+                    "fileName", safeFilename,
                     "sizeBytes", file.getSize(),
                     "sha256", result.sha256(),
                     "signatureMatched", result.signatureMatched(),
@@ -68,10 +71,10 @@ public class ScanController {
             ));
 
         } catch (IOException | RuntimeException exception) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of(
-                            "error", "The file could not be scanned."
-                    ));
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "error", "The file could not be scanned."
+            ));
+
         } finally {
             if (temporaryFile != null) {
                 try {
