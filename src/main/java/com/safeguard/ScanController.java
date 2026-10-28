@@ -3,6 +3,7 @@ package com.safeguard;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,29 +16,36 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+
 @RestController
 @RequestMapping("/api")
 public class ScanController {
+
     private static final Logger logger =
             LoggerFactory.getLogger(ScanController.class);
+
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
-    private final MalwareSignatureChecker signatureChecker =
-            new MalwareSignatureChecker();
+
+    private final MalwareSignatureChecker signatureChecker;
     private final AuditLogService auditLogService;
     private final ScanHistoryService scanHistoryService;
 
     public ScanController(
+            MalwareSignatureChecker signatureChecker,
             AuditLogService auditLogService,
             ScanHistoryService scanHistoryService) {
+        this.signatureChecker = signatureChecker;
         this.auditLogService = auditLogService;
         this.scanHistoryService = scanHistoryService;
     }
+
     @PostMapping(
             value = "/scan",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<Map<String, Object>> scanFile(
             @RequestParam("file") MultipartFile file) {
+
         if (file.isEmpty()) {
             auditLogService.record(
                     "SCAN_REJECTED",
@@ -45,29 +53,33 @@ public class ScanController {
                     "Empty file upload"
             );
 
-
             return ResponseEntity.badRequest().body(Map.of(
                     "error", "Please select a non-empty file."
             ));
         }
+
         if (file.getSize() > MAX_FILE_SIZE) {
             auditLogService.record(
                     "SCAN_REJECTED",
                     "REJECTED",
                     "Upload exceeded the 10 MB limit"
             );
-            return ResponseEntity.status(
-                    org.springframework.http.HttpStatus.PAYLOAD_TOO_LARGE
-            ).body(Map.of(
-                    "error", "File exceeds the 10 MB upload limit."
-            ));
+
+            return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                    .body(Map.of(
+                            "error", "File exceeds the 10 MB upload limit."
+                    ));
         }
+
         Path temporaryFile = null;
+
         try {
             temporaryFile = Files.createTempFile(
                     "safeguard-upload-", ".tmp"
             );
+
             file.transferTo(temporaryFile);
+
             FileInspector inspector = new FileInspector();
             var inspection = inspector.inspect(temporaryFile);
             var result = signatureChecker.scan(temporaryFile);
@@ -89,11 +101,13 @@ public class ScanController {
                     safeFilename = "uploaded-file";
                 }
             }
+
             auditLogService.record(
                     "SCAN_COMPLETED",
                     result.signatureMatched() ? "MATCHED" : "NO_MATCH",
                     "File scan completed; sizeBytes=" + file.getSize()
             );
+
             scanHistoryService.save(
                     safeFilename,
                     file.getSize(),
@@ -101,7 +115,6 @@ public class ScanController {
                     result.signatureMatched() ? "MATCHED" : "NO_MATCH",
                     result.message()
             );
-
             return ResponseEntity.ok(Map.of(
                     "fileName", safeFilename,
                     "sizeBytes", file.getSize(),
@@ -117,10 +130,13 @@ public class ScanController {
                     "ERROR",
                     "File scan failed"
             );
-            logger.error("File scan failed.", exception);
+
+            logger.error("File scan failed.");
+
             return ResponseEntity.internalServerError().body(Map.of(
                     "error", "The file could not be scanned."
             ));
+
         } finally {
             if (temporaryFile != null) {
                 try {

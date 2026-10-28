@@ -16,6 +16,10 @@ Safeguard is a Java cybersecurity learning project focused on file inspection, S
 - File upload size limits and empty-file validation
 - Temporary-file cleanup and safe error responses
 - Automated tests using JUnit 5 and Spring Boot testing support
+- Persistent scan history using an H2 database
+- REST API for retrieving recent scan history
+- CSV export of scan reports
+- Audit logging for scan events
 
 ## Requirements
 
