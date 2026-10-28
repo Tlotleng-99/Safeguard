@@ -1,3 +1,4 @@
+
 const form = document.getElementById("scanForm");
 const fileInput = document.getElementById("fileInput");
 const dropArea = document.getElementById("dropArea");
@@ -8,6 +9,13 @@ const statusMessage = document.getElementById("statusMessage");
 const results = document.getElementById("results");
 
 const MAX_SIZE = 10 * 1024 * 1024;
+
+const dashboardStatus = document.getElementById("dashboardStatus");
+const totalScans = document.getElementById("totalScans");
+const matchedScans = document.getElementById("matchedScans");
+const unmatchedScans = document.getElementById("unmatchedScans");
+const historyBody = document.getElementById("historyBody");
+const refreshHistory = document.getElementById("refreshHistory");
 
 function selectFile(file) {
     if (!file) return;
@@ -54,6 +62,125 @@ dropArea.addEventListener("drop", event => {
     selectFile(file);
 });
 
+function formatSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function addCell(row, value) {
+    const cell = document.createElement("td");
+    cell.textContent = value ?? "";
+    row.appendChild(cell);
+    return cell;
+}
+
+function formatTimestamp(timestamp) {
+    if (!timestamp) return "Unknown";
+
+    const date = new Date(timestamp);
+
+    if (Number.isNaN(date.getTime())) return "Unknown";
+
+    return date.toLocaleString(undefined, {
+        timeZone: "UTC",
+        dateStyle: "medium",
+        timeStyle: "short"
+    });
+}
+
+async function loadHistory() {
+    if (dashboardStatus) {
+        dashboardStatus.textContent = "Loading scan history...";
+    }
+
+    if (refreshHistory) refreshHistory.disabled = true;
+
+    try {
+        const response = await fetch("/api/history", {
+            headers: { "Accept": "application/json" }
+        });
+
+        if (!response.ok) {
+            throw new Error(`History request failed (${response.status}).`);
+        }
+
+        const scans = await response.json();
+
+        if (!Array.isArray(scans)) {
+            throw new Error("The history response was not a list.");
+        }
+
+        const matches = scans.filter(scan => scan.outcome === "MATCHED").length;
+        const noMatches = scans.filter(scan => scan.outcome === "NO_MATCH").length;
+
+        totalScans.textContent = scans.length;
+        matchedScans.textContent = matches;
+        unmatchedScans.textContent = noMatches;
+
+        historyBody.replaceChildren();
+
+        if (scans.length === 0) {
+            const row = document.createElement("tr");
+            const cell = addCell(row, "No scan records yet.");
+            cell.colSpan = 4;
+            historyBody.appendChild(row);
+        } else {
+            scans.forEach(scan => {
+                const row = document.createElement("tr");
+
+                addCell(row, formatTimestamp(scan.scannedAt));
+                addCell(row, scan.fileName || "Unknown");
+                addCell(row, formatSize(Number(scan.sizeBytes) || 0));
+
+                const outcomeCell = addCell(row, "");
+                const outcome = document.createElement("span");
+                outcome.className = "history-badge";
+
+                if (scan.outcome === "MATCHED") {
+                    outcome.classList.add("detected");
+                    outcome.textContent = "MATCHED";
+                } else if (scan.outcome === "NO_MATCH") {
+                    outcome.classList.add("unknown");
+                    outcome.textContent = "NO MATCH";
+                } else {
+                    outcome.classList.add("unknown");
+                    outcome.textContent = scan.outcome || "UNKNOWN";
+                }
+
+                outcomeCell.appendChild(outcome);
+                historyBody.appendChild(row);
+            });
+        }
+
+        if (dashboardStatus) {
+            dashboardStatus.textContent =
+                `Loaded ${scans.length} recent scan record(s).`;
+        }
+    } catch (error) {
+        totalScans.textContent = "—";
+        matchedScans.textContent = "—";
+        unmatchedScans.textContent = "—";
+
+        historyBody.replaceChildren();
+        const row = document.createElement("tr");
+        const cell = addCell(row, "Unable to load scan history. Try refreshing.");
+        cell.colSpan = 4;
+        historyBody.appendChild(row);
+
+        if (dashboardStatus) {
+            dashboardStatus.textContent =
+                error.message || "Unable to load scan history.";
+        }
+    } finally {
+        if (refreshHistory) refreshHistory.disabled = false;
+    }
+}
+
+if (refreshHistory) {
+    refreshHistory.addEventListener("click", loadHistory);
+}
+
 form.addEventListener("submit", async event => {
     event.preventDefault();
 
@@ -94,45 +221,47 @@ form.addEventListener("submit", async event => {
             throw new Error(result.error || "The scan failed.");
         }
 
-        document.getElementById("resultName").textContent =
-            result.fileName;
+        document.getElementById("resultName").textContent = result.fileName;
         document.getElementById("resultSize").textContent =
             `${result.sizeBytes} bytes`;
-        document.getElementById("resultHash").textContent =
-            result.sha256;
-        document.getElementById("resultMessage").textContent =
-            result.message;
+        document.getElementById("resultHash").textContent = result.sha256;
+        document.getElementById("resultMessage").textContent = result.message;
 
+        const badge = document.getElementById("resultBadge");
 
-    const badge = document.getElementById("resultBadge");
+        if (result.signatureMatched === true) {
+            badge.textContent = "KNOWN SIGNATURE MATCH";
+            badge.className = "result-badge detected";
+        } else if (result.signatureMatched === false) {
+            badge.textContent = "NO KNOWN MATCH";
+            badge.className = "result-badge unknown";
+        } else {
+            badge.textContent = "SCAN STATUS UNKNOWN";
+            badge.className = "result-badge unknown";
+        }
 
-    if (result.signatureMatched === true) {
-        badge.textContent = "KNOWN SIGNATURE MATCH";
-        badge.className = "result-badge detected";
-    } else if (result.signatureMatched === false) {
-        badge.textContent = "NO KNOWN MATCH";
-        badge.className = "result-badge unknown";
-    } else {
-        badge.textContent = "SCAN STATUS UNKNOWN";
-        badge.className = "result-badge unknown";
-    }
+        const warning = document.getElementById("resultWarning");
 
-    const warning = document.getElementById("resultWarning");
-
-    if (warning) {
-        warning.textContent = result.signatureMatched === true
-            ? "Warning: A known signature matched. Treat this file as suspicious."
-            : "No known signature matched. This does not prove the file is safe.";
-        warning.hidden = false;
-    }
+        if (warning) {
+            warning.textContent = result.signatureMatched === true
+                ? "Warning: A known signature matched. Treat this file as suspicious."
+                : "No known signature matched. This does not prove the file is safe.";
+            warning.hidden = false;
+        }
 
         results.hidden = false;
         statusMessage.textContent = "Scan completed.";
+
+        // Refresh dashboard after the scan is recorded.
+        await loadHistory();
     } catch (error) {
-        statusMessage.textContent = error.message ||
-            "Unable to contact the scanner.";
+        statusMessage.textContent =
+            error.message || "Unable to contact the scanner.";
     } finally {
         scanButton.disabled = false;
         scanButton.textContent = "Scan file →";
     }
 });
+
+// Load the dashboard when the page opens.
+loadHistory();

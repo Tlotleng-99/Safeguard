@@ -126,9 +126,10 @@ With Safeguard running, use:
 curl -i -X POST http://localhost:8080/api/scan \
   -F "file=@sample.txt"
 ```
-
+````bash opening the browser
+xdg-open http://localhost:8080
 The API returns JSON containing information such as the filename, file size, SHA-256 hash, signature-match status, scan message, and file-inspection result.
-
+````
 ### Error handling
 
 The API validates uploads and returns safe error messages for supported error cases.

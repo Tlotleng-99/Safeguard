@@ -45,13 +45,6 @@ public class ScanController {
                     "Empty file upload"
             );
 
-            scanHistoryService.save(
-                    safeFilename,
-                    file.getSize(),
-                    result.sha256(),
-                    result.signatureMatched() ? "MATCHED" : "NO_MATCH",
-                    result.message()
-            );
 
             return ResponseEntity.badRequest().body(Map.of(
                     "error", "Please select a non-empty file."
@@ -98,6 +91,13 @@ public class ScanController {
                     "SCAN_COMPLETED",
                     result.signatureMatched() ? "MATCHED" : "NO_MATCH",
                     "File scan completed; sizeBytes=" + file.getSize()
+            );
+            scanHistoryService.save(
+                    safeFilename,
+                    file.getSize(),
+                    result.sha256(),
+                    result.signatureMatched() ? "MATCHED" : "NO_MATCH",
+                    result.message()
             );
 
             return ResponseEntity.ok(Map.of(

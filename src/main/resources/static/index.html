@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,6 +27,74 @@
         </p>
     </section>
 
+    <section class="dashboard" aria-labelledby="dashboardTitle">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">OVERVIEW</p>
+                <h2 id="dashboardTitle">Security dashboard</h2>
+            </div>
+            <button id="refreshHistory" class="secondary-button" type="button">
+                Refresh data
+            </button>
+        </div>
+
+        <p id="dashboardStatus" class="status-message"
+           role="status" aria-live="polite">Loading scan history...</p>
+
+        <div class="stats-grid">
+            <article class="stat-card">
+                <span>Total recorded scans</span>
+                <strong id="totalScans">—</strong>
+                <small>Latest records available</small>
+            </article>
+            <article class="stat-card">
+                <span>Signature matches</span>
+                <strong id="matchedScans">—</strong>
+                <small>Known signatures matched</small>
+            </article>
+            <article class="stat-card">
+                <span>No signature match</span>
+                <strong id="unmatchedScans">—</strong>
+                <small>Not proof of file safety</small>
+            </article>
+        </div>
+
+        <section class="panel history-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Recent scan history</h2>
+                    <p>Up to 100 of the latest recorded scans.</p>
+                </div>
+                <a class="secondary-button report-link"
+                   href="/api/reports/scans.csv">
+                    Download CSV
+                </a>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Date (UTC)</th>
+                        <th>File</th>
+                        <th>Size</th>
+                        <th>Outcome</th>
+                    </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                    <tr>
+                        <td colspan="4">Loading scan records...</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="disclaimer">
+                Safeguard checks known file signatures. A no-match result
+                does not prove that a file is safe.
+            </p>
+        </section>
+    </section>
+
     <section class="panel">
         <div class="panel-heading">
             <div>
@@ -44,7 +113,6 @@
             </label>
 
             <input id="fileInput" name="file" type="file" required>
-
             <button id="scanButton" type="submit">Scan file →</button>
         </form>
 
