@@ -64,9 +64,8 @@ class ScanControllerTest {
                 MediaType.TEXT_PLAIN_VALUE,
                 contents
         );
-
         mockMvc.perform(multipart("/api/scan").file(file))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isPayloadTooLarge())
                 .andExpect(jsonPath("$.error")
                         .value("File exceeds the 10 MB upload limit."));
     }

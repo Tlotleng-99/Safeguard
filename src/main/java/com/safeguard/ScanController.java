@@ -56,7 +56,9 @@ public class ScanController {
                     "REJECTED",
                     "Upload exceeded the 10 MB limit"
             );
-            return ResponseEntity.badRequest().body(Map.of(
+            return ResponseEntity.status(
+                    org.springframework.http.HttpStatus.PAYLOAD_TOO_LARGE
+            ).body(Map.of(
                     "error", "File exceeds the 10 MB upload limit."
             ));
         }

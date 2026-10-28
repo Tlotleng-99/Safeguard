@@ -39,9 +39,12 @@ public class AuditLogService {
             return "";
         }
 
-        return details
-                .replace('\n', ' ')
-                .replace('\r', ' ')
-                .replace('\t', ' ');
+        String sanitized = details.replaceAll("[\\p{Cntrl}]", " ");
+
+        if (sanitized.length() > 500) {
+            sanitized = sanitized.substring(0, 500);
+        }
+
+        return sanitized;
     }
 }
